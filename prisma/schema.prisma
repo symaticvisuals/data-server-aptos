@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+model League {
+  id       Int       @id
+  name     String
+  country  String
+  logo     String
+  flag     String
+  season   Int
+  fixtures Fixture[]
+
+  @@index([name, country, season])
+}
+
+model Fixture {
+  id           Int        @id
+  date         DateTime
+  timezone     String
+  status       String
+  homeTeamId   Int
+  awayTeamId   Int
+  leagueId     Int
+  goalsHome    Int? // Optional, can be null
+  goalsAway    Int? // Optional, can be null
+  halftimeHome Int? // Optional, can be null
+  halftimeAway Int? // Optional, can be null
+  bookmakerId  Int? // Optional, can be null
+  homeTeam     Team       @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
+  awayTeam     Team       @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
+  league       League     @relation(fields: [leagueId], references: [id])
+  bookmaker    Bookmaker? @relation(fields: [bookmakerId], references: [id])
+  goals        Goal[]
+  odds         Bet[]
+  teamId       Int? // Optional, can be null
+  Team         Team?      @relation(fields: [teamId], references: [id])
+
+  @@index([date, status])
+}
+
+model Team {
+  id        Int       @id
+  name      String
+  logo      String
+  fixtures  Fixture[] @relation("homeTeam")
+  awayGames Fixture[] @relation("awayTeam")
+  Fixture   Fixture[]
+
+  @@index([name])
+}
+
+model Goal {
+  id           String  @id @default(cuid())
+  fixtureId    Int
+  homeGoals    Int
+  awayGoals    Int
+  halftimeHome Int? // Optional, can be null
+  halftimeAway Int? // Optional, can be null
+  fixture      Fixture @relation(fields: [fixtureId], references: [id])
+
+  @@index([fixtureId])
+}
+
+model Bookmaker {
+  id      Int       @id
+  name    String
+  bet     Bet       @relation(fields: [betId], references: [id])
+  Fixture Fixture[]
+  betId   Int
+
+  @@index([name])
+}
+
+model Bet {
+  id          Int         @id
+  name        String
+  fixtureId   Int
+  bookmakerId Int
+  odds        BetOdd[]
+  fixture     Fixture     @relation(fields: [fixtureId], references: [id])
+  Bookmaker   Bookmaker[]
+
+  @@index([name, fixtureId, bookmakerId])
+}
+
+model BetOdd {
+  id    Int    @id
+  value String
+  odd   Float
+  betId Int
+  bet   Bet    @relation(fields: [betId], references: [id])
+
+  @@index([value, odd])
+}
