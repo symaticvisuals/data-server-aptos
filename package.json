@@ -33,6 +33,6 @@
     "concurrently": "^8.2.0"
   },
   "engines": {
-    "node": ">=14.x"
+    "node": "20.9.0"
   }
 }
