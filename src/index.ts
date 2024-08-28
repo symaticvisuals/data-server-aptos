@@ -1,8 +1,13 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import { getOddsByFixtureId, getWinnerOdds } from "./controllers/odds";
+import {
+  getOddsByFixtureId,
+  getReels,
+  getWinnerOdds,
+} from "./controllers/odds";
 import { createRecords, updateRecords } from "./controllers/create-records";
 import mongoose from "mongoose";
+import { createLeague } from "./controllers/league";
 
 dotenv.config();
 
@@ -29,6 +34,9 @@ app.get("/odds/:fixtureId", getOddsByFixtureId);
 
 app.post("/create-records", createRecords);
 app.post("/update-records", updateRecords);
+
+app.post("/league", createLeague);
+app.get("/reels", getReels);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

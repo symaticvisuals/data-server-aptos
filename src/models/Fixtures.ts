@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 interface IOddValue {
   value: string;
-  odd: string;
+  odd: number; // Use number type here
 }
 
 interface IBet {
@@ -11,15 +11,9 @@ interface IBet {
   values: IOddValue[];
 }
 
-interface IBookmaker {
-  id: number;
-  name: string;
-  bets: IBet[];
-}
-
 interface IOdds {
-  update: string;
-  bookmakers: IBookmaker[];
+  update: string | null;
+  bets: IBet[];
 }
 
 export interface IFixtureData extends Document {
@@ -89,7 +83,7 @@ export interface IFixtureData extends Document {
       away: number | null;
     };
   };
-  odds: IOdds | null; // Updated field to include both update and bookmakers
+  odds: IOdds | null;
 }
 
 const FixtureSchema: Schema = new Schema({
@@ -161,27 +155,18 @@ const FixtureSchema: Schema = new Schema({
   },
   odds: {
     update: { type: String, default: null },
-    bookmakers: {
-      type: [
-        {
-          id: { type: Number, required: true },
-          name: { type: String, required: true },
-          bets: [
-            {
-              id: { type: Number, required: true },
-              name: { type: String, required: true },
-              values: [
-                {
-                  value: { type: String, required: true },
-                  odd: { type: String, required: true },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      default: [],
-    },
+    bets: [
+      {
+        id: { type: Number, required: true },
+        name: { type: String, required: true },
+        values: [
+          {
+            value: { type: String, required: true },
+            odd: { type: Number, required: true }, // Store odds as numbers
+          },
+        ],
+      },
+    ],
   },
 });
 

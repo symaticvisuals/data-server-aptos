@@ -223,10 +223,13 @@ export const updateBookmakers = async (
         continue; // Skip to the next item if the fixture is not found
       }
 
-      // Update the bookmakers information
+      // Aggregate the bookmakers' odds to calculate the average odds
+      const aggregatedOdds = await aggregateBookmakers(bookmakers);
+
+      // Update the odds information with the aggregated odds
       existingFixture.odds = {
         update: item.update,
-        bookmakers: bookmakers,
+        bets: aggregatedOdds, // Store the aggregated odds
       };
 
       // Save the updated document to the database
@@ -241,4 +244,60 @@ export const updateBookmakers = async (
   } catch (error) {
     console.error("Error updating bookmakers:", error);
   }
+};
+
+const aggregateBookmakers = async (bookmakers: IBookmaker[]) => {
+  const aggregatedBets: any = [];
+
+  // Loop through each bookmaker and aggregate bets
+  bookmakers.forEach((bookmaker) => {
+    bookmaker.bets.forEach((bet) => {
+      // Find the existing bet in the aggregatedBets array
+      let existingBet = aggregatedBets.find(
+        (aggBet: any) => aggBet.id === bet.id
+      );
+
+      if (!existingBet) {
+        // If the bet doesn't exist yet, create it
+        existingBet = {
+          id: bet.id,
+          name: bet.name,
+          values: [],
+        };
+        aggregatedBets.push(existingBet);
+      }
+
+      // Aggregate odds for Home, Away, and Draw
+      bet.values.forEach((betValue) => {
+        let existingValue = existingBet!.values.find(
+          (value: any) => value.value === betValue.value
+        );
+
+        if (!existingValue) {
+          // If the value doesn't exist, create it
+          existingValue = {
+            value: betValue.value,
+            odd: 0,
+            count: 0, // Track the count of odds to calculate the average
+          };
+          existingBet!.values.push(existingValue);
+        }
+
+        // Accumulate the odds and increment the count
+        existingValue.odd += +betValue.odd;
+        existingValue.count += 1;
+      });
+    });
+  });
+
+  // Calculate the average odds for each value type
+  aggregatedBets.forEach((bet: any) => {
+    bet.values = bet.values.map((value: any) => ({
+      value: value.value,
+      odd: +(value.odd / value.count).toFixed(2), // Calculate average and format to 2 decimal places
+      _id: value._id,
+    }));
+  });
+
+  return aggregatedBets;
 };
