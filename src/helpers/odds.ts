@@ -62,13 +62,7 @@ const getReelsFixtures = async (page: number = 1, limit: number = 10) => {
       return { data: null, message: "Fixtures not found" };
     }
 
-    // filter the records having fixture date greater than today
-    const today = new Date();
-    const filteredResponse = response.filter(
-      (fixture) => new Date(fixture.fixture.date) > today
-    );
-
-    return { data: filteredResponse, message: "Fixtures found" };
+    return { data: response, message: "Fixtures found" };
   } catch (error) {
     console.error("Error fetching reels fixtures:", error);
     return { data: null, message: "An error occurred while fetching fixtures" };
