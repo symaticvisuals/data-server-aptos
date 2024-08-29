@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import {
+  getBetsRecent,
   getOddsByFixtureId,
   getReels,
   getWinnerOdds,
@@ -41,6 +42,7 @@ app.post("/create-records", createRecords);
 app.post("/update-records", updateRecords);
 
 app.post("/league", createLeague);
+app.post("/recent-bets", getBetsRecent);
 app.get("/reels", getReels);
 
 app.listen(port, () => {

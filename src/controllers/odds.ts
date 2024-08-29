@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { fetchOddsForWinners } from "../helpers/data-fetch";
 import { asyncMiddleware } from "../helpers/utils";
-import { fetchOddsByFixtureId } from "../helpers/fixture";
+import {
+  fetchOddsByFixtureId,
+  getRecentBetsByFixtureId,
+} from "../helpers/fixture";
 import { getReelsFixtures } from "../helpers/odds";
 
 const getWinnerOdds = asyncMiddleware(async (_req: any, res: Response) => {
@@ -50,4 +53,16 @@ const getReels = asyncMiddleware(async (req: Request, res: Response) => {
   }
 });
 
-export { getWinnerOdds, getOddsByFixtureId, getReels };
+const getBetsRecent = asyncMiddleware(async (req: Request, res: Response) => {
+  try {
+    const { fixtureIds } = req.body;
+    const getFixtures = await getRecentBetsByFixtureId(fixtureIds);
+    res.status(200).json(getFixtures);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching fixtures" });
+  }
+});
+
+export { getWinnerOdds, getOddsByFixtureId, getReels, getBetsRecent };

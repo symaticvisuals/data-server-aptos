@@ -65,4 +65,33 @@ const getFixturesByLeagueId = async (leagueId: number, season: number) => {
   };
 };
 
-export { fetchOddsByFixtureId, getFixturesByLeagueId };
+const getRecentBetsByFixtureId = async (fixtureIds: string[]) => {
+  try {
+    // Convert fixture IDs to integers
+    const numericFixtureIds = fixtureIds.map((id) => parseInt(id, 10));
+    console.log(`Querying for fixture IDs: ${numericFixtureIds}`);
+
+    // Fetch only the necessary fields, excluding _id and __v
+    const fixtures = await FixtureData.find(
+      { "fixture.id": { $in: numericFixtureIds } },
+      { _id: 0, __v: 0 } // Exclude _id and __v fields
+    );
+
+    // Check if any fixtures were found
+    if (!fixtures || fixtures.length === 0) {
+      return { data: null, message: "Fixtures not found" };
+    }
+
+    return { data: fixtures, message: "Fixtures found" };
+  } catch (error) {
+    // Handle any potential errors
+    console.error("Error fetching fixtures:", error);
+    return { data: null, message: "An error occurred while fetching fixtures" };
+  }
+};
+
+export {
+  fetchOddsByFixtureId,
+  getFixturesByLeagueId,
+  getRecentBetsByFixtureId,
+};
